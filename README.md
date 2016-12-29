@@ -9,21 +9,23 @@ This is a simple blog project,it use nodejs+express+mongodb completed.
 * git
 
 ##Step 2: checkout source CODE
-use following command to clone the source code.
-git clone https://github.com/672489861/NodeJs-Practise-Blog-.git
+>use following command to clone the source code.  
+>git clone https://github.com/672489861/NodeJs-Practise-Blog-.git
+
 
 ##Step 3: run mongodb servers
-use following command to run your local mongodb server. (Note: you might need to set up the db path first)
+>use following command to run your local mongodb server. (Note: you might need to set up the db path first)  
+>mongod --dbpath /data/db
 
 ##Step 4: install dependencies
-use following command to install npm dependencies.
-npm install
+>use following command to install npm dependencies.  
+>npm install
 
 ##Step 5: run your application
-use following command to start the application.
-node server.js
+>use following command to start the application.  
+>node server.js
 
-##References
+##References:
 #### Source Code:
 https://github.com/672489861/NodeJs-Practise-Blog-
 #### NodeJS:
