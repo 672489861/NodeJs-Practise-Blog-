@@ -19,8 +19,15 @@ router.get('/', function (req, res, next) {
             req.flash('error', '遇到错误，请稍后再试');
             return res.redirect('back'); // 返回之前页面
         }
-        res.render('posts', {
-            posts: posts
+        Promise.all(posts.map(function (post) {
+            return commentModel.getCommentsCount(post._id).then(function (commentsCount) {
+                post.commentsCount = commentsCount;
+                return post;
+            });
+        })).then(function (result) {
+            res.render('posts', {
+                posts: result
+            });
         });
     });
 });
@@ -76,7 +83,6 @@ router.get('/:postId', function (req, res, next) {
             comments: comments
         });
     }).catch(function (reason) {
-        console.info(reason);
     });
 });
 
@@ -85,18 +91,48 @@ router.get('/:postId/remove', checkLogin, function (req, res) {
     var postId = req.params.postId;
     var author = req.session.user._id;
 
-    postModel.delPostById(postId, author, function (err, post) {
+    postModel.delPostById(postId, author, function (err, result) {
         if (!err) {
-            req.flash('success', '删除文章成功');
-            // 删除成功后跳转到主页
-            res.redirect('/posts');
+            // 删除所有留言
+            commentModel.delCommentsByPostId(postId, function (err, result) {
+                req.flash('success', '删除文章成功');
+                // 删除成功后跳转到主页
+                res.redirect('/posts');
+            });
         }
+    });
+});
+
+// GET /posts/:postId/edit 更新文章页
+router.get('/:postId/edit', checkLogin, function (req, res, next) {
+    var postId = req.params.postId;
+    var author = req.session.user._id;
+
+    postModel.getPostById(postId).then(function (post) {
+        if (!post || post.length == 0) {
+            throw new Error('该文章不存在');
+        }
+        if (author.toString() !== post[0].author._id.toString()) {
+            throw new Error('权限不足');
+        }
+        res.render('edit', {
+            post: post[0]
+        });
     });
 });
 
 // POST /posts/:postId/edit 更新一篇文章
 router.post('/:postId/edit', checkLogin, function (req, res) {
+    var postId = req.params.postId;
+    var author = req.session.user._id;
+    var title = req.fields.title;
+    var content = req.fields.content;
 
+    postModel.updatePostById(postId, author, {title: title, content: content}, function (err, result) {
+        req.flash('success', '编辑文章成功');
+        // 编辑成功后跳转到上一页
+        res.redirect(`/posts/${postId}`);
+    });
 });
 
 // POST /posts/:postId/comment 创建一条留言

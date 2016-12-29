@@ -3,7 +3,7 @@
  */
 var mongoose = require("../lib/mongo.js");
 
-var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
+var Schema = mongoose.Schema;
 
 var postSchema = Schema({
     author: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
@@ -61,8 +61,7 @@ postSchema.statics.findByAuthor = function (queryObj, cb) {
 
 // 查询指定文章
 postSchema.statics.getPostById = function (postId) {
-    return this.find({'_id': postId}).populate('author').exec(function (err, post) {
-    });
+    return this.find({'_id': postId}).populate('author').exec();
 };
 
 // 阅读量变更
@@ -74,6 +73,11 @@ postSchema.statics.incPv = function (postId) {
 // 删除文章
 postSchema.statics.delPostById = function (postId, author, cb) {
     this.remove({_id: postId, author: author}, cb);
+};
+
+// 更新指定文章
+postSchema.statics.updatePostById = function (postId, author, updateDatas, cb) {
+    this.update({_id: postId, author: author}, {$set: updateDatas}, cb);
 };
 
 var postModel = mongoose.model('post', postSchema);
